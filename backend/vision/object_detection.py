@@ -2,15 +2,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from importlib import import_module
 from threading import Lock, Thread
-import pyttsx3
 
-try:
-    from ultralytics import YOLO
-except Exception:  # pragma: no cover - optional during local setup
-    YOLO = None
-
-from .navigation import get_location_from_bbox
+from backend.vision.navigation import get_location_from_bbox
 
 TARGET_CLASSES = {"person", "chair", "table", "bottle", "laptop", "door"}
 
@@ -26,14 +21,24 @@ class VisionDetector:
     """Wrapper around YOLOv8 inference with optional audio feedback."""
 
     def __init__(self) -> None:
-        self.model = YOLO("yolov8n.pt") if YOLO else None
-        self.tts_engine = pyttsx3.init()
+        self.model = None
+        self.tts_engine = None
         self._speech_lock = Lock()
 
-    def detect(self, frame) -> list[DetectedObject]:
-        if self.model is None:
-            return []
+    def _ensure_model(self) -> None:
+        if self.model is not None:
+            return
+        ultralytics = import_module("ultralytics")
+        self.model = ultralytics.YOLO("yolov8n.pt")
 
+    def _ensure_tts(self) -> None:
+        if self.tts_engine is not None:
+            return
+        pyttsx3 = import_module("pyttsx3")
+        self.tts_engine = pyttsx3.init()
+
+    def detect(self, frame) -> list[DetectedObject]:
+        self._ensure_model()
         results = self.model.predict(source=frame, conf=0.45, verbose=False)
         detections: list[DetectedObject] = []
         for result in results:
@@ -57,6 +62,7 @@ class VisionDetector:
 
     def speak_async(self, message: str) -> None:
         def _speak() -> None:
+            self._ensure_tts()
             with self._speech_lock:
                 self.tts_engine.say(message)
                 self.tts_engine.runAndWait()

@@ -3,8 +3,8 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import APIRouter, HTTPException
 
-from database import get_db
-from models import DetectionCreate, DetectionUpdate
+from backend.database import get_db
+from backend.models import DetectionCreate, DetectionUpdate
 
 router = APIRouter(prefix="/detections", tags=["detections"])
 

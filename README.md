@@ -60,12 +60,11 @@ Collection: **`detections`**
 
 ## Backend Setup (Port 8000)
 ```bash
-cd backend
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-cp ../.env.example .env
-uvicorn main:app --reload --port 8000
+pip install -r backend/requirements.txt
+cp .env.example .env
+uvicorn backend.main:app --reload --port 8000
 ```
 
 ## Frontend Setup (Port 3000)
@@ -78,8 +77,9 @@ npm start
 
 ## API Documentation
 FastAPI docs available at:
-- `http://localhost:8000/docs`
-- `http://localhost:8000/redoc`
+- API root: `http://localhost:8000/`
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
 
 ### Detection APIs
 - `GET /detections`
@@ -93,6 +93,7 @@ FastAPI docs available at:
 - `POST /stop-camera`
 - `POST /detect-objects`
 - `POST /navigate`
+- `POST /voice-command`
 - `GET /camera-feed`
 - `GET /status`
 
@@ -117,3 +118,11 @@ FastAPI docs available at:
 - YOLO model `yolov8n.pt` downloads on first run.
 - Webcam access is required for live detection.
 - pyttsx3/speech packages may require OS audio backends.
+
+
+## Backend not running? Quick fixes
+- Install backend dependencies first: `pip install -r backend/requirements.txt`.
+- Start the API from the project root with `uvicorn backend.main:app --reload --port 8000`.
+- Open `http://localhost:8000/` to verify the backend is up.
+- Open `http://localhost:8000/docs` for the API UI.
+- If webcam streaming fails, the backend still starts, but `/camera-feed` returns a `503` until a webcam is available.
