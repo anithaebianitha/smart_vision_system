@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+opencv-python
+ultralytics
+pymongo
+motor
+pyttsx3
+speechrecognition
+numpy
+python-multipart
