@@ -22,6 +22,7 @@ smart_vision_system/
 │   │   ├── camera_routes.py
 │   │   └── detection_routes.py
 │   └── vision/
+│       ├── camera_manager.py
 │       ├── navigation.py
 │       └── object_detection.py
 ├── frontend/
@@ -133,3 +134,9 @@ FastAPI docs available at:
 - On Windows, the old `PORT=3000 react-scripts start` style can fail in Command Prompt. The frontend now uses `cross-env`, so `npm start` works on Windows too.
 - If the UI shows API errors, make sure the backend is running at `http://localhost:8000`.
 - If needed, create `frontend/.env` with `REACT_APP_API_URL=http://localhost:8000`.
+
+
+## Laptop camera troubleshooting
+- The backend now attempts to open the laptop webcam using multiple OpenCV backends (`CAP_DSHOW`, `CAP_MSMF`, `CAP_ANY`).
+- The frontend also requests browser camera permission with `getUserMedia()` so the user can immediately see the laptop camera preview.
+- If camera start fails, close Zoom/Meet/Camera app and try again because only one app may hold the webcam.

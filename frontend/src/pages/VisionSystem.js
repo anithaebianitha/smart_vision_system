@@ -20,6 +20,9 @@ const VisionSystem = () => {
       setDetections(historyRes.data.slice(0, 8));
       setRunning(Boolean(statusRes.data.running));
       setCameraError(statusRes.data.last_error || '');
+      if (statusRes.data.camera_available) {
+        setStatus((currentStatus) => (currentStatus === 'Idle' ? 'Camera ready' : currentStatus));
+      }
     } catch (apiError) {
       setError(apiError.message);
     } finally {
@@ -40,11 +43,12 @@ const VisionSystem = () => {
       if (normalized.includes('start camera')) {
         await startCamera();
         setRunning(true);
-        setStatus('Camera started');
+        setStatus('Laptop camera started');
       } else if (normalized.includes('stop camera')) {
         await stopCamera();
         setRunning(false);
         setStatus('Camera stopped');
+        setCameraError('');
       } else if (normalized.includes('detect')) {
         await detectObjects();
         setStatus('Object detection enabled');
