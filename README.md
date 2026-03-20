@@ -71,7 +71,8 @@ uvicorn backend.main:app --reload --port 8000
 ```bash
 cd frontend
 npm install
-cp ../.env.example .env
+copy ..\.env.example .env   # Windows Command Prompt
+# or: cp ../.env.example .env  # Git Bash / macOS / Linux
 npm start
 ```
 
@@ -126,3 +127,9 @@ FastAPI docs available at:
 - Open `http://localhost:8000/` to verify the backend is up.
 - Open `http://localhost:8000/docs` for the API UI.
 - If webcam streaming fails, the backend still starts, but `/camera-feed` returns a `503` until a webcam is available.
+
+
+## Frontend troubleshooting
+- On Windows, the old `PORT=3000 react-scripts start` style can fail in Command Prompt. The frontend now uses `cross-env`, so `npm start` works on Windows too.
+- If the UI shows API errors, make sure the backend is running at `http://localhost:8000`.
+- If needed, create `frontend/.env` with `REACT_APP_API_URL=http://localhost:8000`.

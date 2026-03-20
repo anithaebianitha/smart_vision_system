@@ -1,26 +1,37 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-const VoiceControl = ({ onCommand }) => {
+const VoiceControl = ({ onCommand, isBusy }) => {
   const [isListening, setIsListening] = useState(false);
   const [lastCommand, setLastCommand] = useState('');
+  const [speechSupportError, setSpeechSupportError] = useState('');
   const recognitionRef = useRef(null);
+
+  const SpeechRecognition = useMemo(
+    () => (window.SpeechRecognition || window.webkitSpeechRecognition || null),
+    []
+  );
 
   const startListening = () => {
     if (!SpeechRecognition) {
-      alert('Web Speech API is not supported in this browser.');
+      setSpeechSupportError('Web Speech API is not supported in this browser. Use Chrome or Edge.');
       return;
     }
 
+    setSpeechSupportError('');
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
     recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
 
-    recognition.onresult = (event) => {
+    recognition.onresult = async (event) => {
       const command = event.results[0][0].transcript.toLowerCase();
       setLastCommand(command);
-      onCommand(command);
+      await onCommand(command);
+    };
+
+    recognition.onerror = () => {
+      setSpeechSupportError('Voice recognition failed. Please try again.');
+      setIsListening(false);
     };
 
     recognition.onend = () => setIsListening(false);
@@ -35,14 +46,20 @@ const VoiceControl = ({ onCommand }) => {
   };
 
   return (
-    <div className="card shadow-sm">
-      <div className="card-header">Voice Command Panel</div>
-      <div className="card-body">
-        <button className="btn btn-primary me-2" onClick={startListening} disabled={isListening}>Activate Voice</button>
-        <button className="btn btn-outline-secondary" onClick={stopListening}>Stop Voice</button>
-        <p className="small text-muted mt-3 mb-0">Try: “Start camera”, “Stop camera”, “Detect objects”, “Navigate”</p>
-        {lastCommand && <div className="alert alert-info mt-3 py-2">Last command: {lastCommand}</div>}
+    <div className="glass-card rounded-4 p-3 p-lg-4 h-100">
+      <p className="page-section-title mb-1">Voice Control</p>
+      <h4 className="mb-3">Command center</h4>
+      <div className="d-flex gap-2 flex-wrap">
+        <button className="btn gradient-btn text-white" onClick={startListening} disabled={isListening || isBusy}>
+          {isListening ? 'Listening...' : 'Activate Voice'}
+        </button>
+        <button className="btn btn-outline-secondary" onClick={stopListening} disabled={!isListening}>
+          Stop Voice
+        </button>
       </div>
+      <p className="small text-muted mt-3 mb-2">Try: “Start camera”, “Stop camera”, “Detect objects”, “Navigate”</p>
+      {lastCommand && <div className="alert alert-info py-2">Last command: {lastCommand}</div>}
+      {speechSupportError && <div className="alert alert-warning py-2 mb-0">{speechSupportError}</div>}
     </div>
   );
 };
